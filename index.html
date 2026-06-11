@@ -356,11 +356,16 @@ let selectedEvent = null;
 let events = [];
 let nextId = 1;
 
-// LEER DATOS DE GOOGLE SHEETS
+// LEER DATOS DE GOOGLE SHEETS (Optimizado para evitar bloqueos de caché y CORS)
 async function loadEvents() {
   document.getElementById('monthLabel').textContent = "Cargando...";
   try {
-    const response = await fetch(SHEET_WEB_APP_URL);
+    // Agregamos un timestamp para que el navegador no te muestre una versión vieja guardada
+    const cacheBuster = "?cb=" + new Date().getTime();
+    const response = await fetch(SHEET_WEB_APP_URL + cacheBuster);
+    
+    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+    
     const data = await response.json();
     events = data;
     
@@ -373,8 +378,9 @@ async function loadEvents() {
     renderHeader();
     renderCalendar();
   } catch (error) {
-    alert("Error al conectar con Google Sheets. Verificá los permisos del Apps Script.");
-    console.error(error);
+    console.error("Error al cargar:", error);
+    document.getElementById('monthLabel').textContent = "Error de conexión";
+    alert("El calendario no pudo leer los datos de Google Sheets. Asegurate de haber elegido 'Nueva versión' al implementar en Apps Script.");
   }
 }
 
@@ -391,9 +397,13 @@ async function saveToGoogleSheets() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: "saveAll", data: events })
     });
-    setTimeout(() => { loader.style.display = 'none'; }, 800);
+    
+    // Como la escritura es exitosa (ya lo comprobaste), refrescamos localmente tras el envío
+    setTimeout(() => { 
+      loader.style.display = 'none'; 
+    }, 800);
   } catch (error) {
-    alert("No se pudieron sincronizar los datos en la nube.");
+    alert("No se pudieron sincronizar los datos.");
     loader.style.display = 'none';
   }
 }
