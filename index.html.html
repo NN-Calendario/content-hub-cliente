@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Hub - Client View</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <style>
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --color-bg-main: #f5f3f0;          
+      --color-bg-card: #ffffff;          
+      --color-border: #d9d9d9;           
+      --color-border-hover: #4a4a4a;     
+      --color-text-primary: #0b1f4d;     
+      --color-text-secondary: #4a4a4a;   
+      --color-text-muted: #4a4a4a;       
+      --color-brand: #0b1f4d;            
+      --color-brand-hover: #102a63;      
+      
+      --bg-reel: #e2e8f0; --text-reel: #0b1f4d; --border-reel: #cbd5e1;
+      --bg-historia: #f1f5f9; --text-historia: #102a63; --border-historia: #e2e8f0;
+      --bg-carrusel: #e0f2fe; --text-carrusel: #0369a1; --border-carrusel: #bae6fd;
+      --bg-post: #f8fafc; --text-post: #334155; --border-post: #cbd5e1;
+      
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --shadow-sm: 0 1px 2px 0 rgba(11, 31, 77, 0.03);
+      --shadow-md: 0 4px 12px -2px rgba(11, 31, 77, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--color-bg-main);
+      font-family: var(--font-sans);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+      padding: 2rem;
+    }
+
+    .hub { max-width: 1200px; margin: 0 auto; position: relative; }
+
+    .sync-loader {
+      position: absolute;
+      top: 0; right: 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #15803d;
+      background: #dcfce7;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .brand span {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-left: 10px;
+      background: var(--color-border);
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+    .controls { display: flex; align-items: center; gap: 12px; }
+    .month-nav {
+      display: flex;
+      align-items: center;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+    .month-label {
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 140px;
+      text-align: center;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { background: var(--color-bg-main); color: var(--color-text-primary); }
+    
+    .add-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--color-brand);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+    .add-btn:hover { background: var(--color-brand-hover); }
+
+    .stat-bar { display: flex; gap: 12px; margin-bottom: 2rem; flex-wrap: wrap; }
+    .stat {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      min-width: 140px;
+      flex: 1;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat strong { display: block; font-size: 26px; font-weight: 700; margin-bottom: 2px; }
+    .stat span { color: var(--color-text-secondary); opacity: 0.8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      background: var(--color-bg-card);
+      padding: 14px 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .filter-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); opacity: 0.7; min-width: 80px; }
+
+    .filter-chip {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      background: var(--color-bg-card);
+      transition: all 0.2s;
+    }
+    .filter-chip:hover { border-color: var(--color-border-hover); color: var(--color-text-primary); }
+    .filter-chip.active { border-color: #102a63; background: #102a63; color: #fff; }
+
+    .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 6px; }
+    .cal-header div {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      opacity: 0.6;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 6px 0;
+    }
+    
+    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+    
+    .day-cell {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      min-height: 115px;
+      padding: 10px;
+      background: var(--color-bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+    .day-cell.other-month { background: transparent; border-style: dashed; opacity: .35; }
+    .day-cell.today { border-color: #102a63; border-width: 1.5px; }
+    
+    .day-num { font-size: 12px; font-weight: 700; color: var(--color-text-secondary); margin-bottom: 8px; padding-left: 2px;}
+    .day-cell.today .day-num { color: #102a63; }
+
+    .ev-pill {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .ev-pill:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(11,31,77,0.06); }
+    
+    .ev-pill[data-type="Reel"] { background: var(--bg-reel); color: var(--text-reel); border-color: var(--border-reel); }
+    .ev-pill[data-type="Historia"] { background: var(--bg-historia); color: var(--text-historia); border-color: var(--border-historia); }
+    .ev-pill[data-type="Carrusel"] { background: var(--bg-carrusel); color: var(--text-carrusel); border-color: var(--border-carrusel); }
+    .ev-pill[data-type="Post"] { background: var(--bg-post); color: var(--text-post); border-color: var(--border-post); }
+
+    .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .st-borrador { background: #4a4a4a; }
+    .st-revision { background: #be123c; } 
+    .st-aprobado { background: #15803d; } 
+    .st-publicado { background: #102a63; } 
+
+    .detail-panel {
+      margin-top: 2rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      background: var(--color-bg-card);
+      box-shadow: var(--shadow-md);
+    }
+    .detail-empty { color: var(--color-text-secondary); opacity: 0.7; font-size: 13px; display: flex; align-items: center; gap: 8px; justify-content: center; padding: 2.5rem 0; }
+    .detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem;}
+    .detail-title { font-size: 19px; font-weight: 600; color: var(--color-text-primary); letter-spacing: -0.01em; }
+    .detail-date { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; text-transform: capitalize; }
+    .detail-badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+    
+    .detail-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .detail-field { font-size: 13px; }
+    .detail-field label { display: block; color: var(--color-text-secondary); opacity: 0.6; margin-bottom: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .detail-field p { color: var(--color-text-primary); font-weight: 600; font-size: 14px; }
+    .detail-field p .mark-status { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 500;}
+    
+    .detail-actions { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; border-top: 1px solid var(--color-border); padding-top: 1.25rem; }
+    .act-btn {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      background: var(--color-bg-card);
+      color: var(--color-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .act-btn:hover { background: var(--color-bg-main); border-color: var(--color-border-hover); color: var(--color-text-primary); }
+    .act-btn.btn-delete { margin-left: auto; color: #be123c; border-color: rgba(190, 18, 60, 0.15); }
+    .act-btn.btn-delete:hover { background: #fff1f2; border-color: #be123c; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(11, 31, 77, 0.2); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--color-bg-card); border-radius: var(--radius-lg); padding: 1.75rem; width: 420px; max-width: 95vw; border: 1px solid var(--color-border); box-shadow: var(--shadow-md); }
+    .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 1.25rem; color: var(--color-text-primary); }
+    
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 11px; font-weight: 700; color: var(--color-text-secondary); opacity: 0.7; text-transform: uppercase; margin-bottom: 6px; }
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%; font-family: var(--font-sans); font-size: 13px; padding: 9px 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-bg-main); color: var(--color-text-primary); outline: none;
+    }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--color-brand-hover); background: #fff; }
+    .form-row textarea { resize: vertical; min-height: 80px; }
+    
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
+    .btn-primary { background: var(--color-brand); border: none; color: #fff; padding: 8px 18px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; font-weight: 500; }
+    .btn-cancel { background: none; border: 1px solid var(--color-border); color: var(--text-secondary); padding: 8px 18px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<div class="hub">
+  <div class="sync-loader" id="syncLoader"><i class="ti ti-refresh-dot ti-spin"></i> Guardando en Google Sheets...</div>
+  
+  <div class="topbar">
+    <div class="brand">Content Hub <span>Vista del cliente</span></div>
+    <div class="controls">
+      <div class="month-nav">
+        <button class="nav-btn" onclick="changeMonth(-1)"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+        <span class="month-label" id="monthLabel">Cargando...</span>
+        <button class="nav-btn" onclick="changeMonth(1)"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <button class="add-btn" onclick="openModal()"><i class="ti ti-plus" aria-hidden="true"></i> Nuevo contenido</button>
+    </div>
+  </div>
+
+  <div class="stat-bar" id="statBar"></div>
+
+  <div class="filter-group">
+    <div class="filter-row">
+      <span class="filter-label">Formato:</span>
+      <div class="filter-chip active" data-filter="type" data-value="all" onclick="setFilter('type', 'all')">Todos</div>
+      <div class="filter-chip" data-filter="type" data-value="Reel" onclick="setFilter('type', 'Reel')">Reel</div>
+      <div class="filter-chip" data-filter="type" data-value="Historia" onclick="setFilter('type', 'Historia')">Historia</div>
+      <div class="filter-chip" data-filter="type" data-value="Carrusel" onclick="setFilter('type', 'Carrusel')">Carrusel</div>
+      <div class="filter-chip" data-filter="type" data-value="Post" onclick="setFilter('type', 'Post')">Post</div>
+    </div>
+    <div class="filter-row" style="border-top: 1px dashed var(--color-border); padding-top: 8px;">
+      <span class="filter-label">Campaña:</span>
+      <div class="filter-chip active" data-filter="campaign" data-value="all" onclick="setFilter('campaign', 'all')">Todas</div>
+      <div class="filter-chip" data-filter="campaign" data-value="Hemofilia" onclick="setFilter('campaign', 'Hemofilia')">Hemofilia</div>
+      <div class="filter-chip" data-filter="campaign" data-value="Crecimiento" onclick="setFilter('campaign', 'Crecimiento')">Crecimiento</div>
+    </div>
+  </div>
+
+  <div class="cal-header" id="calHeader"></div>
+  <div class="cal-grid" id="calGrid"></div>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-empty"><i class="ti ti-hand-click" style="font-size:18px" aria-hidden="true"></i> Seleccioná un contenido para ver el detalle</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Nuevo contenido</h3>
+    <div class="form-row"><label>Título</label><input type="text" id="fTitle" placeholder="Ej. Lanzamiento de Producto"></div>
+    <div class="form-row"><label>Campaña / Línea</label><select id="fCampaign"><option>Hemofilia</option><option>Crecimiento</option></select></div>
+    <div class="form-row"><label>Fecha</label><input type="date" id="fDate"></div>
+    <div class="form-row"><label>Tipo</label><select id="fType"><option>Reel</option><option>Historia</option><option>Carrusel</option><option>Post</option></select></div>
+    <div class="form-row"><label>Estado</label><select id="fStatus"><option value="borrador">Borrador</option><option value="revision">En revisión</option><option value="aprobado">Aprobado</option><option value="publicado">Publicado</option></select></div>
+    <div class="form-row"><label>Canal</label><select id="fChannel"><option>Instagram</option><option>TikTok</option><option>LinkedIn</option><option>Facebook</option></select></div>
+    <div class="form-row"><label>Notas</label><textarea id="fNotes" placeholder="Agrega aquí el copy, links de recursos..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveEvent()">Guardar contenido</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// CONFIGURACIÓN: URL INYECTADA CON ÉXITO
+// ==========================================
+const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwfxUSFRPw7xP7YDQATTQMt80f_XdVZwepaX5VWH2AIE52VVsc3MdtYRS_cLAZbf87fMQ/exec"; 
+
+const DAYS_ES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const STATUS_LABELS = {borrador:'Borrador',revision:'En revisión',aprobado:'Aprobado',publicado:'Publicado'};
+
+let currentDate = new Date(2026, 5, 1); // Junio 2026
+let activeFilters = { type: 'all', campaign: 'all' };
+let selectedEvent = null;
+let events = [];
+let nextId = 1;
+
+// LEER DATOS DE GOOGLE SHEETS
+async function loadEvents() {
+  document.getElementById('monthLabel').textContent = "Cargando...";
+  try {
+    const response = await fetch(SHEET_WEB_APP_URL);
+    const data = await response.json();
+    events = data;
+    
+    if(events.length > 0) {
+      nextId = Math.max(...events.map(e => parseInt(e.id) || 0)) + 1;
+    } else {
+      nextId = 1;
+    }
+    
+    renderHeader();
+    renderCalendar();
+  } catch (error) {
+    alert("Error al conectar con Google Sheets. Verificá los permisos del Apps Script.");
+    console.error(error);
+  }
+}
+
+// MANDAR CAMBIOS A GOOGLE SHEETS
+async function saveToGoogleSheets() {
+  const loader = document.getElementById('syncLoader');
+  loader.style.display = 'inline-flex';
+  
+  try {
+    await fetch(SHEET_WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors', 
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: "saveAll", data: events })
+    });
+    setTimeout(() => { loader.style.display = 'none'; }, 800);
+  } catch (error) {
+    alert("No se pudieron sincronizar los datos en la nube.");
+    loader.style.display = 'none';
+  }
+}
+
+function eventsForMonth(y,m){
+  return events.filter(e=>{
+    const d=new Date(e.date + "T00:00:00");
+    return d.getFullYear()===y && d.getMonth()===m;
+  });
+}
+
+function renderHeader(){
+  const h = document.getElementById('calHeader');
+  h.innerHTML = DAYS_ES.map(d=>`<div>${d}</div>`).join('');
+}
+
+function renderStats(){
+  const y=currentDate.getFullYear(), m=currentDate.getMonth();
+  const ev = events.filter(e => {
+    const d = new Date(e.date + "T00:00:00");
+    const matchMonth = d.getFullYear()===y && d.getMonth()===m;
+    const matchType = activeFilters.type === 'all' || e.type === activeFilters.type;
+    const matchCamp = activeFilters.campaign === 'all' || e.campaign === activeFilters.campaign;
+    return matchMonth && matchType && matchCamp;
+  });
+
+  const total=ev.length;
+  const pub=ev.filter(e=>e.status==='publicado').length;
+  const ap=ev.filter(e=>e.status==='aprobado').length;
+  const rev=ev.filter(e=>e.status==='revision').length;
+  
+  document.getElementById('statBar').innerHTML=`
+    <div class="stat"><strong>${total}</strong><span>Contenidos</span></div>
+    <div class="stat"><strong style="color:#102a63">${pub}</strong><span>Publicados</span></div>
+    <div class="stat"><strong style="color:#15803d">${ap}</strong><span>Aprobados</span></div>
+    <div class="stat"><strong style="color:#be123c">${rev}</strong><span>En revisión</span></div>
+  `;
+}
+
+function renderCalendar(){
+  const y=currentDate.getFullYear(), m=currentDate.getMonth();
+  document.getElementById('monthLabel').textContent=`${MONTHS_ES[m]} ${y}`;
+  renderStats();
+
+  const firstDay = new Date(y,m,1).getDay();
+  const offset = firstDay===0?6:firstDay-1;
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const daysInPrev = new Date(y,m,0).getDate();
+  const today = new Date();
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML='';
+
+  const totalCells = Math.ceil((offset+daysInMonth)/7)*7;
+
+  for(let i=0;i<totalCells;i++){
+    const cell=document.createElement('div');
+    cell.className='day-cell';
+    let day,isOther=false,dateStr;
+
+    if(i<offset){day=daysInPrev-offset+i+1;isOther=true;const pm=m===0?11:m-1;const py=m===0?y-1:y;dateStr=`${py}-${String(pm+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
+    else if(i>=offset+daysInMonth){day=i-offset-daysInMonth+1;isOther=true;const nm=m===11?0:m+1;const ny=m===11?y+1:y;dateStr=`${ny}-${String(nm+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
+    else{day=i-offset+1;dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
+
+    if(isOther)cell.classList.add('other-month');
+    if(!isOther && day===today.getDate() && m===today.getMonth() && y===today.getFullYear())cell.classList.add('today');
+
+    const numDiv=document.createElement('div');
+    numDiv.className='day-num';
+    numDiv.textContent=day;
+    cell.appendChild(numDiv);
+
+    const dayEvs = events.filter(e => {
+      return e.date === dateStr && 
+             (activeFilters.type === 'all' || e.type === activeFilters.type) && 
+             (activeFilters.campaign === 'all' || e.campaign === activeFilters.campaign);
+    });
+
+    dayEvs.forEach(ev=>{
+      const pill=document.createElement('div');
+      pill.className='ev-pill';
+      pill.setAttribute('data-type',ev.type);
+      const campBadge = `<span style="font-size:9px; opacity:0.5; font-weight:700;">[${ev.campaign ? ev.campaign[0] : 'H'}]</span>`;
+      pill.innerHTML=`<span class="status-dot st-${ev.status}"></span> ${campBadge} ${ev.title}`;
+      pill.onclick=(e)=>{e.stopPropagation();showDetail(ev.id)};
+      cell.appendChild(pill);
+    });
+
+    grid.appendChild(cell);
+  }
+}
+
+function showDetail(id){
+  selectedEvent=events.find(e=>e.id==id);
+  if(!selectedEvent)return;
+  const ev=selectedEvent;
+  const d=new Date(ev.date + "T00:00:00");
+  const dateStr=d.toLocaleDateString('es-AR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  
+  const typeColors={Reel:'background:var(--bg-reel);color:var(--text-reel);border:1px solid var(--border-reel)',Historia:'background:var(--bg-historia);color:var(--text-historia);border:1px solid var(--border-historia)',Carrusel:'background:var(--bg-carrusel);color:var(--text-carrusel);border:1px solid var(--border-carrusel)',Post:'background:var(--bg-post);color:var(--text-post);border:1px solid var(--border-post)'};
+  const statusColors={borrador:'background:#e2e8f0;color:#4a4a4a',revision:'background:#ffe4e6;color:#be123c',aprobado:'background:#dcfce7;color:#15803d',publicado:'background:#dbeafe;color:#102a63'};
+  
+  document.getElementById('detailPanel').innerHTML=`
+    <div class="detail-header">
+      <div>
+        <div class="detail-title">${ev.title}</div>
+        <div class="detail-date">${dateStr}</div>
+      </div>
+      <span class="detail-badge" style="${typeColors[ev.type]}">${ev.type}</span>
+    </div>
+    <div class="detail-body">
+      <div class="detail-field"><label>Estado</label><p><span class="mark-status" style="${statusColors[ev.status]}"><span class="status-dot st-${ev.status}"></span>${STATUS_LABELS[ev.status]}</span></p></div>
+      <div class="detail-field"><label>Campaña</label><p style="color:#102a63; font-weight:600;"><i class="ti ti-folder"></i> ${ev.campaign || 'Hemofilia'}</p></div>
+      <div class="detail-field"><label>Canal</label><p><i class="ti ti-brand-${ev.channel.toLowerCase()}"></i> ${ev.channel}</p></div>
+      <div class="detail-field" style="grid-column:1/-1"><label>Notas y Copies</label><p style="font-weight:400; color:var(--color-text-secondary); line-height:1.5; white-space:pre-wrap;">${ev.notes||'—'}</p></div>
+    </div>
+    <div class="detail-actions">
+      <button class="act-btn" onclick="changeStatus(${ev.id},'revision')"><span class="status-dot st-revision"></span>Solicitar revisión</button>
+      <button class="act-btn" onclick="changeStatus(${ev.id},'aprobado')"><span class="status-dot st-aprobado"></span>Aprobar contenido</button>
+      <button class="act-btn" onclick="changeStatus(${ev.id},'publicado')"><span class="status-dot st-publicado"></span>Marcar como publicado</button>
+      <button class="act-btn btn-delete" onclick="deleteEvent(${ev.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>
+  `;
+}
+
+function changeStatus(id,status){
+  const ev=events.find(e=>e.id==id);
+  if(ev){
+    ev.status=status;
+    renderCalendar();
+    showDetail(id);
+    saveToGoogleSheets(); 
+  }
+}
+
+function deleteEvent(id){
+  events=events.filter(e=>e.id!=id);
+  renderCalendar();
+  document.getElementById('detailPanel').innerHTML='<div class="detail-empty"><i class="ti ti-hand-click" style="font-size:18px" aria-hidden="true"></i> Seleccioná un contenido para ver el detalle</div>';
+  saveToGoogleSheets(); 
+}
+
+function setFilter(category, value){
+  activeFilters[category] = value;
+  document.querySelectorAll(`.filter-chip[data-filter="${category}"]`).forEach(c => {
+    c.classList.toggle('active', c.dataset.value === value);
+  });
+  renderCalendar();
+}
+
+function changeMonth(dir){
+  currentDate.setMonth(currentDate.getMonth()+dir);
+  renderCalendar();
+}
+
+function openModal(){
+  const today=new Date();
+  document.getElementById('fDate').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  document.getElementById('fTitle').value='';
+  document.getElementById('fNotes').value='';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+
+function saveEvent(){
+  const title=document.getElementById('fTitle').value.trim();
+  const date=document.getElementById('fDate').value;
+  if(!title||!date){alert('Completá título y fecha');return;}
+  
+  events.push({
+    id: nextId++,
+    title,
+    date,
+    campaign: document.getElementById('fCampaign').value,
+    type:document.getElementById('fType').value,
+    status:document.getElementById('fStatus').value,
+    channel:document.getElementById('fChannel').value,
+    notes:document.getElementById('fNotes').value
+  });
+  
+  closeModal();
+  renderCalendar();
+  saveToGoogleSheets(); 
+}
+
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// INICIO AUTOMÁTICO
+loadEvents();
+</script>
+
+</body>
+</html>
